@@ -1,27 +1,58 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Bloom Filter Membership Tester - Tiny Tapeout
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * AREA PROBE VERSION - control logic is minimal and not yet correct.
+ * Purpose is to measure synthesized area of the datapath.
  */
-
 `default_nettype none
 
 module tt_um_manasvibhat_bloom_filter (
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
-    input  wire [7:0] uio_in,   // IOs: Input path
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
-    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input  wire [7:0] ui_in,
+    output wire [7:0] uo_out,
+    input  wire [7:0] uio_in,
+    output wire [7:0] uio_out,
+    output wire [7:0] uio_oe,
+    input  wire       ena,
+    input  wire       clk,
+    input  wire       rst_n
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+  localparam M     = 64;
+  localparam IDX_W = 6;
 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  wire [IDX_W-1:0] idx1, idx2;
+  wire             hit;
+
+  wire mode    = uio_in[0];   // 1 = insert, 0 = query
+  wire strobe  = uio_in[1];
+  wire dbg_sel = uio_in[2];
+
+  bloom_hash u_hash (
+      .x    (ui_in),
+      .idx1 (idx1),
+      .idx2 (idx2)
+  );
+
+  bloom_array #(
+      .M     (M),
+      .IDX_W (IDX_W)
+  ) u_array (
+      .clk       (clk),
+      .rst_n     (rst_n),
+      .idx1      (idx1),
+      .idx2      (idx2),
+      .do_insert (strobe & mode),
+      .hit       (hit)
+  );
+
+  // Debug: expose one of the two hash indices
+  wire [IDX_W-1:0] dbg_idx = dbg_sel ? idx2 : idx1;
+
+  assign uo_out  = {dbg_idx, 1'b0, hit};
+  assign uio_out = 8'h00;
+  assign uio_oe  = 8'h00;   // all bidirectional pins are inputs
+
+  wire _unused = &{ena, uio_in[7:3], 1'b0};
 
 endmodule

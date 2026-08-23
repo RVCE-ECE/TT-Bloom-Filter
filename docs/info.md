@@ -15,7 +15,7 @@ the upper bits down into a 6-bit index (6 bits addresses all 64 array
 positions):
 
     h1 = x[5:0] ^ {x[7:6], 4'b0000}
-    r  = {x[2:0], x[7:3]}          // rotate left by 3 (wiring only, no gates)
+    r  = {x[4:0], x[7:5]}          // rotate left by 3 (wiring only, no gates)
     h2 = r[5:0] ^ {r[7:6], 4'b0000}
 
 These are deliberately not cryptographic hashes. A Bloom filter only requires
