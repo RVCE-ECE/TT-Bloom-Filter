@@ -1,7 +1,7 @@
 # Tiny Tapeout project information
 project:
   title:        "Bloom Filter Membership Tester"      # Project title
-  author:       "Manasvibhat"      # Your name
+  author:       "Manasvi Bhat K, Vaishnavi Karpur, Shylashree N, RV College of Engineering"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Probabilistic set membership tester: 64-bit array, 2 XOR-fold hash functions, insert and query operations with zero false negatives"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
